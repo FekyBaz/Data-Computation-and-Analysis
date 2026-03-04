@@ -87,24 +87,6 @@ Students must submit:
 4. **Clear written explanations**
    - Do not submit screenshots of code without explanation.
 
----
-
-## Suggested Repository Structure
-
-```text
-.
-├── data/                     # dataset(s)
-├── notebooks/                # Jupyter notebooks
-├── src/                      # python source code
-│   ├── preprocessing.py
-│   ├── feature_ranking.py
-│   ├── lda_model.py
-│   └── evaluation.py
-├── reports/
-│   └── project1_report.pdf
-├── figures/                  # saved plots
-└── README.md
-```
 
 ---
 
@@ -117,10 +99,3 @@ To support the report, include:
 - LDA performance metrics (accuracy, confusion matrix, class-wise scores)
 - Stability comparison between ranking methods
 - Final discussion linking theory to observed results
-
----
-
-## Language Note (from assignment)
-
-**دا المطلوب**: المطلوب هو تنفيذ معايير ترتيب الخصائص (Pearson, Spearman, Gini, Chi-square, Information Gain)، ثم تدريب **Multi-class LDA** على أفضل الخصائص، ومقارنة الثبات والأداء مع تحليل نظري واضح داخل التقرير.
-
