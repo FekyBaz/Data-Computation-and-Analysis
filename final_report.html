@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Final Project Report: Multi-Class LDA and Feature Selection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f0fdf4;
+            --secondary: #dcfce7;
+            --accent: #22c55e;
+            --accent-dark: #16a34a;
+            --bg-color: #0f172a;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --card-bg: rgba(255, 255, 255, 0.95);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            line-height: 1.7;
+            margin: 0;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 50px 60px;
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2), 0 1px 3px rgba(255,255,255,0.1) inset;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+        h1, h2, h3, h4 {
+            font-family: 'Outfit', sans-serif;
+            color: #0f172a;
+            margin-top: 1.8em;
+            margin-bottom: 0.8em;
+            letter-spacing: -0.02em;
+        }
+        h1 {
+            font-size: 2.8em;
+            text-align: center;
+            background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.2em;
+        }
+        h2 {
+            font-size: 1.8em;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 50px;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            border-radius: 2px;
+        }
+        p {
+            text-align: justify;
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+        ul, ol {
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+        li {
+            margin-bottom: 10px;
+            padding-left: 5px;
+        }
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .subtitle {
+            font-size: 1.2em;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .student-card {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-align: center;
+        }
+        .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .student-name {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1.05em;
+        }
+        .student-id {
+            color: #64748b;
+            font-size: 0.9em;
+            margin-top: 4px;
+        }
+        figure {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            margin: 30px 0;
+            transition: transform 0.3s ease;
+        }
+        figure:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        img {
+            border-radius: 8px;
+            width: 100%;
+            height: auto;
+        }
+        figcaption {
+            margin-top: 15px !important;
+            font-size: 0.95em;
+            color: #475569;
+            font-style: italic;
+        }
+        
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                color: #000 !important;
+            }
+            .container {
+                width: 100% !important;
+                max-width: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                background-color: transparent !important;
+                transform: none !important;
+            }
+            h1 {
+                -webkit-text-fill-color: #000 !important;
+                background: none !important;
+                border-bottom: 2px solid #000 !important;
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+            h2::after {
+                background: #000 !important;
+            }
+            .header-section {
+                page-break-after: always;
+                break-after: page;
+                margin-bottom: 0 !important;
+                padding-bottom: 0 !important;
+                border-bottom: none !important;
+            }
+            .team-grid {
+                background: transparent !important;
+                border: none !important;
+                padding: 0 !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                display: grid !important;
+            }
+            .student-card {
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            figure {
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin: 10px 0 !important;
+            }
+            table, tr, td, th {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            p, li {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            h2 {
+                page-break-before: always;
+                break-before: page;
+                margin-top: 0 !important;
+            }
+            @page {
+                size: landscape A4;
+                margin: 1.5cm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <h1>Comparative Analysis of Filter-Based Feature Selection on Multi-Class LDA</h1>
+            <div class="subtitle">Final Course Project Report</div>
+            
+            <div class="team-grid">
+                <div class="student-card">
+                    <div class="student-name">Mohamed Soliman Elfeky</div>
+                    <div class="student-id">ID: 2305467</div>
+                </div>
+                <div class="student-card">
+                    <div class="student-name">Mostafa Mohamed Gamal</div>
+                    <div class="student-id">ID: 2305084</div>
+                </div>
+                <div class="student-card">
+                    <div class="student-name">Nour Emad Abdallah</div>
+                    <div class="student-id">ID: 2305343</div>
+                </div>
+                <div class="student-card">
+                    <div class="student-name">Fathallah Samir Farouk</div>
+                    <div class="student-id">ID: 2305463</div>
+                </div>
+                <div class="student-card">
+                    <div class="student-name">Fares Osama Khalifa</div>
+                    <div class="student-id">ID: 2305418</div>
+                </div>
+            </div>
+        </div>
+
+        <h2>1. Abstract</h2>
+        <p>This report investigates the impact of diverse filter feature selection criteria on the predictive performance and stability of a custom Multi-Class Linear Discriminant Analysis (LDA) classifier. High-dimensional datasets pose computational and theoretical challenges for distance-based and linear classifiers. By systematically applying and evaluating five ranking metrics—Pearson Correlation, Spearman Rank Correlation, Gini Index, Chi-Square Statistic, and Information Gain—we analyze the trade-offs between linear, monotonic, and information-theoretic dependencies. The framework incorporates proper leakage-safe cross-validation, dimensionality reduction via Linear Discriminant Analysis (LDA) for visual insights, and stability assessment using the Jaccard similarity index across multiple selected subset sizes (<em>k</em>).</p>
+
+        <h2>2. Dataset Description</h2>
+        <p>The core dataset utilized for this multi-class classification task corresponds to the strict requisite constraints of having at least 6 features, at least 3 classes, and zero missing values.</p>
+        <ul>
+            <li><strong>Dataset Name</strong>: Dry Bean Dataset.</li>
+            <li><strong>Features</strong>: 16 numeric features representing morphological and shape statistics of dry beans (e.g., Area, Perimeter, MajorAxisLength, MinorAxisLength, AspectRation, Eccentricity, ConvexArea).</li>
+            <li><strong>Classes</strong>: 7 distinct bean varieties (Seker, Barbunya, Bombay, Cali, Dermosan, Horoz, Sira).</li>
+            <li><strong>Missing Values</strong>: 0 missing values, ensuring immediate readiness for mathematical transformations.</li>
+            <li><strong>Instance Count</strong>: 13,611 samples.</li>
+        </ul>
+        <p>Prior to modeling, features were standardized using Z-score normalization to ensure all variables contribute proportionately to distance and variance measurements, which is strictly necessary for PCA and LDA algorithms.</p>
+
+        <h2>3. Dimensionality Reduction (LDA)</h2>
+        <p>Understanding the intrinsic dimensionality and class separability of the dataset is crucial prior to classification. <strong>Linear Discriminant Analysis (LDA)</strong> was applied to project the 16-dimensional feature space into a 2D plane. Unlike PCA, which unsupervisedly maximizes total variance, LDA is a supervised method that identifies the axes that best separate the multiple classes.</p>
+        <p>Applying LDA to project the dataset into two linear discriminants demonstrated its ability to maximize class margins. Visualizing this 2D projection showed that some classes (e.g., Bombay) are highly separable and sit as distinct clusters, while others still exhibit some overlap. This highlights that while LDA provides an optimal linear embedding for separability, robust feature selection remains essential to identify the specific attributes that maximize class discrimination in the original high-dimensional space.</p>
+        <figure style="text-align: center; margin-top: 20px;">
+            <img src="plot_img_1.png" alt="LDA Projection of Dry Bean Dataset" style="width: 80%; max-width: 700px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
+            <figcaption style="margin-top: 8px;"><strong>Figure 1:</strong> 2D LDA Projection of the 7 Dry Bean Classes.</figcaption>
+        </figure>
+
+        <h2>4. Feature Ranking Criteria: Theoretical Differences</h2>
+        <p>Filter-based feature selection evaluates the intrinsic properties of the data independently of the classifier. We implemented five criteria, each capturing different types of relationships between the features and the target labels.</p>
+        <ol>
+            <li><strong>Pearson Correlation:</strong> Measures the <em>linear</em> dependence between continuous features. Since our target is a multi-class categorical label, it was treated ordinally for this calculation. This fundamentally limits Pearson's ability to capture complex, non-linear class separability, making it the most basic filter tested.</li>
+            <li><strong>Spearman Rank Correlation:</strong> Evaluates the <em>monotonic</em> relationship by applying the Pearson formula to the rank-transformed values. It is inherently more robust to outliers and skewed distributions compared to Pearson, though still fundamentally limited to monotonic trends.</li>
+            <li><strong>Chi-Square Statistic:</strong> A non-parametric test of <em>statistical independence</em>. Because the features are continuous, they must be discretized (we used quantile binning) before calculating. It measures the divergence of observed feature-class co-occurrences against the expected frequencies assuming no relationship. It easily captures non-linear relationships.</li>
+            <li><strong>Information Gain (Entropy-based):</strong> Rooted in Information Theory, it calculates the reduction in entropy (uncertainty) of the class labels given the knowledge of a feature's binned values. It captures arbitrary structural patterns and interactions but is highly sensitive to the granularity of the discretization.</li>
+            <li><strong>Gini Gain:</strong> Conceptually similar to Information Gain, it measures the reduction in <em>Gini Impurity</em>—the probability of misclassifying a random sample. It is slightly more computationally efficient than entropy and often prefers larger, more diverse partitions.</li>
+        </ol>
+
+        <h2>5. Experimental Methodology</h2>
+        <h3>5.1 Multi-Class LDA Implementation</h3>
+        <p>A custom Multi-class Linear Discriminant Analysis (LDA) classifier was trained from scratch. LDA operates by finding a linear projection space that maximizes the ratio of between-class variance to within-class variance. It utilizes Eigenvalue decomposition of the scatter matrices to identify the optimal discriminant axes. Predictions are subsequently made assigning samples to the class whose projected centroid is closest via Euclidean distance.</p>
+
+        <h3>5.2 Leakage-Safe Stratified Cross-Validation</h3>
+        <p>A major pitfall in feature selection is <strong>data leakage</strong>, which occurs when features are ranked based on the entire dataset before splitting into train/test sets. This results in overly optimistic performance estimates. To prevent this, we employed a strict 5-Fold Stratified Cross-Validation loop. In each iteration, the feature ranking algorithms were fitted <em>only</em> on the 80% training fold. The top-<em>k</em> features were then extracted, and the LDA was trained and evaluated on the corresponding 20% validation fold.</p>
+
+        <h3>5.3 Subset Selection (k)</h3>
+        <p>The experiments were iterated across varying sizes of top feature subsets: <em>k</em> &isin; {2, 3, 4, 5, 8, 10, 16}. This allows us to observe the saturation point of predictive performance and the behavior of the different metrics at various subset complexities.</p>
+
+        <h2>6. Results and Discussion</h2>
+
+        <h3>6.1 Predictive Performance (Accuracy and Macro-F1)</h3>
+        <p>The results highlighted distinct performance curves across the values of <em>k</em>:</p>
+        <ul>
+            <li><strong>Information Gain & Gini:</strong> Consistently outperformed the correlation-based metrics. They peaked at <em>k=10</em>, achieving cross-validation accuracies of approximately <strong>98.3%</strong>, virtually matching the model trained on all 16 features.</li>
+            <li><strong>Pearson & Spearman:</strong> Struggled significantly at lower values of <em>k</em> (<em>k &lt; 5</em>), yielding lower accuracy. This directly reflects their theoretical limitation: enforcing linear or monotonic assumptions on categorical targets fails to properly map out complex class boundaries.</li>
+            <li><strong>Chi-Square:</strong> Paralleled the information-theoretic metrics but occasionally showed fluctuations depending on the strictness of the discrete binning limits altering the expected frequency distribution shapes.</li>
+        </ul>
+        <figure style="text-align: center; margin-top: 20px;">
+            <img src="plot_img_2.png" alt="Performance and Stability Across Subset Size k" style="width: 80%; max-width: 700px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
+            <figcaption style="margin-top: 8px;"><strong>Figure 2:</strong> Classification Performance across varying Top-k feature subsets.</figcaption>
+        </figure>
+
+        <h3>6.2 Stability Analysis (Jaccard Index)</h3>
+        <p>Feature selection stability refers to how consistently a metric selects the same features across different CV folds. We evaluated this using the mean pairwise Jaccard Similarity index. A score of 1.0 indicates identical features selected across all folds, while 0.0 indicates completely disjoint sets.</p>
+        <p>We observed that:</p>
+        <ul>
+            <li>Stability naturally increases with <em>k</em> because a larger proportion of the total feature pool is selected, forcing an intersection overlap.</li>
+            <li>At modest values of <em>k</em>, <strong>Information Gain</strong> and <strong>Gini</strong> demonstrated the highest stability (Jaccard > 0.95), proving that they reliably identify the most informative features regardless of minor fold perturbations.</li>
+            <li><strong>Pearson</strong> exhibited higher variance and lower stability, as the linear calculations were more sensitive to the specific samples within a given training split.</li>
+        </ul>
+
+        <h3>6.3 Sensitivity to Discretization</h3>
+        <p>For Chi-Square, Information Gain, and Gini Index, continuous features were converted to discrete intervals. A sensitivity analysis was conducted varying the number of quantile bins from 3 to 15. The findings show that while 5-10 bins provide optimal mapping without fracturing the data too thinly, going beyond 15 bins causes <em>data fragmentation</em>, artificially inflating Information Gain on redundant features and slightly degrading test accuracy.</p>
+        <figure style="text-align: center; margin-top: 20px;">
+            <img src="plot_img_3.png" alt="Sensitivity of Information Theoretic Metrics to Bin Size" style="width: 80%; max-width: 700px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
+            <figcaption style="margin-top: 8px;"><strong>Figure 3:</strong> Sensitivity Analysis of Cross-Validation Accuracy compared to Discretization Bin Count.</figcaption>
+        </figure>
+
+        <h2>7. Conclusion</h2>
+        <p>This study confirms that the choice of filter criteria heavily dictates the efficiency and accuracy of a Multi-Class LDA model. The empirical results align tightly with theoretical expectations: information-theoretic criteria (Information Gain, Gini) universally outperform linear assumptions (Pearson) on complex multi-class problems. While ranking methods provide computational efficiency, doing so within a leakage-free cross-validation framework is mathematically paramount. The Multi-class LDA naturally acts as a strong, fast generalized classifier when provided with overlapping, robustly selected top-<em>k</em> features.</p>
+        
+        <br><br>
+        <p style="text-align: center; font-size: 0.9em; color: gray;"><em>End of Report.</em></p>
+    </div>
+</body>
+</html>
