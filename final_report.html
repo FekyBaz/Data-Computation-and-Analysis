@@ -259,20 +259,20 @@
         <h2>2. Dataset Description</h2>
         <p>The core dataset utilized for this multi-class classification task corresponds to the strict requisite constraints of having at least 6 features, at least 3 classes, and zero missing values.</p>
         <ul>
-            <li><strong>Dataset Name</strong>: Dry Bean Dataset.</li>
-            <li><strong>Features</strong>: 16 numeric features representing morphological and shape statistics of dry beans (e.g., Area, Perimeter, MajorAxisLength, MinorAxisLength, AspectRation, Eccentricity, ConvexArea).</li>
-            <li><strong>Classes</strong>: 7 distinct bean varieties (Seker, Barbunya, Bombay, Cali, Dermosan, Horoz, Sira).</li>
+            <li><strong>Dataset Name</strong>: Wine Dataset (from scikit-learn).</li>
+            <li><strong>Features</strong>: 13 numeric features characterizing the chemical constituents of wines (e.g., alcohol, malic_acid, ash, alcalinity_of_ash, magnesium, total_phenols, flavanoids).</li>
+            <li><strong>Classes</strong>: 3 distinct wine cultivars (class_0, class_1, class_2).</li>
             <li><strong>Missing Values</strong>: 0 missing values, ensuring immediate readiness for mathematical transformations.</li>
-            <li><strong>Instance Count</strong>: 13,611 samples.</li>
+            <li><strong>Instance Count</strong>: 178 samples.</li>
         </ul>
         <p>Prior to modeling, features were standardized using Z-score normalization to ensure all variables contribute proportionately to distance and variance measurements, which is strictly necessary for PCA and LDA algorithms.</p>
 
         <h2>3. Dimensionality Reduction (LDA)</h2>
-        <p>Understanding the intrinsic dimensionality and class separability of the dataset is crucial prior to classification. <strong>Linear Discriminant Analysis (LDA)</strong> was applied to project the 16-dimensional feature space into a 2D plane. Unlike PCA, which unsupervisedly maximizes total variance, LDA is a supervised method that identifies the axes that best separate the multiple classes.</p>
-        <p>Applying LDA to project the dataset into two linear discriminants demonstrated its ability to maximize class margins. Visualizing this 2D projection showed that some classes (e.g., Bombay) are highly separable and sit as distinct clusters, while others still exhibit some overlap. This highlights that while LDA provides an optimal linear embedding for separability, robust feature selection remains essential to identify the specific attributes that maximize class discrimination in the original high-dimensional space.</p>
+        <p>Understanding the intrinsic dimensionality and class separability of the dataset is crucial prior to classification. <strong>Linear Discriminant Analysis (LDA)</strong> was applied to project the 13-dimensional feature space into a 2D plane. Unlike PCA, which unsupervisedly maximizes total variance, LDA is a supervised method that identifies the axes that best separate the multiple classes.</p>
+        <p>Applying LDA to project the dataset into two linear discriminants demonstrated its ability to maximize class margins. Visualizing this 2D projection showed that some classes (e.g., class_0) are highly separable and sit as distinct clusters, while others still exhibit some overlap. This highlights that while LDA provides an optimal linear embedding for separability, robust feature selection remains essential to identify the specific attributes that maximize class discrimination in the original high-dimensional space.</p>
         <figure style="text-align: center; margin-top: 20px;">
-            <img src="plot_img_1.png" alt="LDA Projection of Dry Bean Dataset" style="width: 80%; max-width: 700px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
-            <figcaption style="margin-top: 8px;"><strong>Figure 1:</strong> 2D LDA Projection of the 7 Dry Bean Classes.</figcaption>
+            <img src="plot_img_1.png" alt="LDA Projection of Wine Dataset" style="width: 80%; max-width: 700px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
+            <figcaption style="margin-top: 8px;"><strong>Figure 1:</strong> 2D LDA Projection of the 3 Wine Classes.</figcaption>
         </figure>
 
         <h2>4. Feature Ranking Criteria: Theoretical Differences</h2>
@@ -293,14 +293,14 @@
         <p>A major pitfall in feature selection is <strong>data leakage</strong>, which occurs when features are ranked based on the entire dataset before splitting into train/test sets. This results in overly optimistic performance estimates. To prevent this, we employed a strict 5-Fold Stratified Cross-Validation loop. In each iteration, the feature ranking algorithms were fitted <em>only</em> on the 80% training fold. The top-<em>k</em> features were then extracted, and the LDA was trained and evaluated on the corresponding 20% validation fold.</p>
 
         <h3>5.3 Subset Selection (k)</h3>
-        <p>The experiments were iterated across varying sizes of top feature subsets: <em>k</em> &isin; {2, 3, 4, 5, 8, 10, 16}. This allows us to observe the saturation point of predictive performance and the behavior of the different metrics at various subset complexities.</p>
+        <p>The experiments were iterated across varying sizes of top feature subsets: <em>k</em> &isin; {2, 3, 4, 5, 8, 10, 13}. This allows us to observe the saturation point of predictive performance and the behavior of the different metrics at various subset complexities.</p>
 
         <h2>6. Results and Discussion</h2>
 
         <h3>6.1 Predictive Performance (Accuracy and Macro-F1)</h3>
         <p>The results highlighted distinct performance curves across the values of <em>k</em>:</p>
         <ul>
-            <li><strong>Information Gain & Gini:</strong> Consistently outperformed the correlation-based metrics. They peaked at <em>k=10</em>, achieving cross-validation accuracies of approximately <strong>98.3%</strong>, virtually matching the model trained on all 16 features.</li>
+            <li><strong>Information Gain & Gini:</strong> Consistently outperformed the correlation-based metrics. They peaked at roughly <em>k=10</em>, achieving high cross-validation accuracies and virtually matching the model trained on all 13 features.</li>
             <li><strong>Pearson & Spearman:</strong> Struggled significantly at lower values of <em>k</em> (<em>k &lt; 5</em>), yielding lower accuracy. This directly reflects their theoretical limitation: enforcing linear or monotonic assumptions on categorical targets fails to properly map out complex class boundaries.</li>
             <li><strong>Chi-Square:</strong> Paralleled the information-theoretic metrics but occasionally showed fluctuations depending on the strictness of the discrete binning limits altering the expected frequency distribution shapes.</li>
         </ul>
