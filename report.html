@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Report - Filter Feature Selection and Multi-Class LDA</title>
+  <style>
+    body {
+      font-family: "Times New Roman", serif;
+      line-height: 1.45;
+      max-width: 980px;
+      margin: 28px auto;
+      padding: 0 18px;
+      color: #111;
+    }
+    h1, h2, h3 { margin-top: 1.2em; margin-bottom: 0.4em; }
+    h1 { font-size: 1.9rem; }
+    h2 { font-size: 1.35rem; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    p { margin: 0.45em 0; text-align: justify; }
+    ul { margin-top: 0.3em; }
+    .eq { margin-left: 18px; font-style: italic; }
+    .figure-note {
+      margin: 0.5em 0 0.8em 0;
+      padding: 8px 10px;
+      background: #f7f7f7;
+      border-left: 3px solid #888;
+      font-size: 0.96rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Filter-Based Feature Selection for Multi-Class Classification with LDA</h1>
+
+  <h2>1. Introduction</h2>
+  <p>
+    This project studies dimensionality reduction through filter-based feature selection and evaluates how different ranking criteria affect multi-class classification performance.
+    The workflow applies five filter criteria (Pearson, Spearman, Chi-Square, Gini Index, and Information Gain), ranks features with each method,
+    and trains a multi-class LDA classifier using top-k subsets. The report focuses on performance, ranking stability, and sensitivity to discretization.
+  </p>
+
+  <h2>2. Dataset Description</h2>
+  <p>
+    The experiments use the Wine dataset (178 samples, 13 numerical features, 3 classes). The dataset satisfies all assignment constraints:
+    multi-class problem (3 classes), more than 6 features (13), and complete observations without missing values.
+  </p>
+  <ul>
+    <li>Samples: 178</li>
+    <li>Features: 13 continuous attributes</li>
+    <li>Classes: 3 target categories</li>
+  </ul>
+
+  <h2>3. Data Validation and Exploratory Analysis</h2>
+  <p>
+    Before modeling, the pipeline validates data quality and consistency by checking dataset structure, data types, missing values, duplicate rows,
+    and class distribution. No missing values and no duplicates are found.
+  </p>
+  <p>
+    Exploratory analysis includes class-count visualization, per-feature distributions, class-conditional boxplots, and a correlation heatmap.
+    These plots confirm that several features are class-informative while some pairs are strongly correlated.
+  </p>
+  <div class="figure-note"><strong>Figures used:</strong> class distribution bar chart, feature histograms, class-wise boxplots, and feature correlation heatmap.</div>
+
+  <h2>4. Feature Selection Methods</h2>
+  <p>
+    All feature selection criteria are implemented from scratch and used to produce descending feature rankings.
+  </p>
+  <h3>4.1 Pearson Correlation</h3>
+  <p>
+    For each feature \(X_j\), the absolute Pearson correlation with target \(y\) is used.
+  </p>
+  <p class="eq">\( r_j = \left|\frac{\mathrm{cov}(X_j, y)}{\sigma_{X_j}\sigma_y}\right| \)</p>
+
+  <h3>4.2 Spearman Rank Correlation</h3>
+  <p>
+    Feature and target values are converted to ranks, then Pearson is computed on ranked values.
+  </p>
+  <p class="eq">\( \rho_j = \left|\mathrm{corr}(\mathrm{rank}(X_j),\mathrm{rank}(y))\right| \)</p>
+
+  <h3>4.3 Chi-Square Statistic</h3>
+  <p>
+    Continuous features are discretized (quantile bins), then a contingency table against class labels is built.
+    The feature score is the Chi-Square statistic:
+  </p>
+  <p class="eq">\( \chi^2_j = \sum_{a,b} \frac{(O_{ab}-E_{ab})^2}{E_{ab}} \)</p>
+
+  <h3>4.4 Gini Impurity Reduction</h3>
+  <p>
+    For each discretized feature, impurity reduction from parent to child partitions is computed:
+  </p>
+  <p class="eq">\( \mathrm{GiniGain}(X_j)=\mathrm{Gini}(y)-\sum_t p_t\,\mathrm{Gini}(y\mid X_j=t) \)</p>
+
+  <h3>4.5 Information Gain</h3>
+  <p>
+    Information Gain is computed as entropy reduction after partitioning by a discretized feature:
+  </p>
+  <p class="eq">\( \mathrm{IG}(X_j)=H(y)-\sum_t p_t\,H(y\mid X_j=t) \)</p>
+
+  <h2>5. Multi-Class LDA Model</h2>
+  <p>
+    Classification is performed with a manual multi-class LDA implementation. For each class, the class mean is estimated and a pooled covariance matrix is computed from training data.
+    Prediction uses linear discriminant scores with shared covariance assumption.
+  </p>
+  <p class="eq">\( \delta_k(x)=x^T\Sigma^{-1}\mu_k-\frac{1}{2}\mu_k^T\Sigma^{-1}\mu_k+\log\pi_k \)</p>
+  <p>
+    The assigned class is \(\arg\max_k \delta_k(x)\). Features are standardized inside each fold before LDA training.
+  </p>
+
+  <h2>6. Experimental Setup</h2>
+  <p>
+    Evaluation uses 5-fold stratified cross-validation with leakage-safe design: feature ranking is recomputed using only each training fold, then top-k features are selected.
+    The tested feature counts are:
+  </p>
+  <p class="eq">\(k = [2, 4, 6, 8, 10, 13]\)</p>
+  <p>
+    Performance metrics include accuracy, macro precision, macro recall, macro F1-score, and confusion matrix.
+  </p>
+
+  <h2>7. Results and Performance Comparison</h2>
+  <p>
+    Each method is evaluated across all k values. As k increases, performance generally improves and then saturates near the full feature set.
+    Differences across methods are clearer at smaller k values, where ranking choice has higher impact.
+  </p>
+  <div class="figure-note"><strong>Figures used:</strong> Accuracy vs Top-k Features, Macro-F1 vs Top-k Features, and confusion matrix for the best method-k setting.</div>
+
+  <h2>8. Stability Analysis</h2>
+  <p>
+    Stability is analyzed in two ways:
+  </p>
+  <ul>
+    <li><strong>Jaccard similarity</strong> between top-k feature sets across folds (set-level stability).</li>
+    <li><strong>Spearman rank correlation</strong> between full ranking lists across methods/folds (order-level stability).</li>
+  </ul>
+  <p>
+    Jaccard values usually increase with larger k due to higher overlap, while rank correlations highlight how similarly methods order all features.
+  </p>
+
+  <h2>9. Sensitivity Analysis</h2>
+  <p>
+    Since Chi-Square, Information Gain, and Gini depend on discretization, a sensitivity study is performed with different quantile bin counts:
+  </p>
+  <p class="eq">\(\text{bins} = [3, 5, 7, 10]\)</p>
+  <p>
+    The analysis compares metric trends under different binning granularity and confirms that broad conclusions remain stable,
+    although small differences can appear for specific methods.
+  </p>
+
+  <h2>10. Discussion of Theoretical Differences</h2>
+  <p>
+    Pearson and Spearman measure association with target labels (linear vs monotonic after ranking). They are simple and fast, but can miss class-separation patterns that are not well represented by correlation.
+    Chi-Square, Information Gain, and Gini are class-distribution based criteria on discretized features, often capturing class purity effects more directly,
+    but they depend on discretization quality and bin selection.
+  </p>
+  <p>
+    Therefore, no single criterion is universally best; method choice depends on the expected relationship type, robustness needs, and interpretability goals.
+  </p>
+
+  <h2>11. Conclusion</h2>
+  <p>
+    The final pipeline provides a complete filter-based dimensionality reduction study for multi-class classification.
+    It includes dataset validation, from-scratch feature scoring, top-k experiments, manual multi-class LDA evaluation,
+    ranking stability analysis, and discretization sensitivity testing.
+    The results show that feature selection method, subset size, and discretization strategy jointly influence both predictive performance and ranking robustness.
+  </p>
+</body>
+</html>
